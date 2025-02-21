@@ -1,0 +1,179 @@
+html {
+	height: 100%;
+	background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+}
+
+body {
+	min-height: 100%;
+	font-family: Arial, sans-serif;
+	padding: 20px;
+	color: #333333;
+}
+
+.container {
+	max-width: 800px; /* Constrain the container's width */
+	margin: 0 auto; /* Center it horizontally */
+	background-color: white;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	margin-bottom: 20px;
+}
+
+.section {
+	margin-bottom: 30px;
+}
+
+.section-header {
+	font-size: 1.5em;
+	margin-bottom: 10px;
+	border-bottom: 2px solid #dddddd;
+	padding-bottom: 5px;
+}
+
+.upload-section {
+	text-align: center;
+	padding: 20px;
+	border: 2px dashed #dddddd;
+	border-radius: 4px;
+	margin-bottom: 20px;
+	margin-top: 50px;
+}
+
+#topicImagePreview,
+#handwritingPreview {
+	max-width: 100%;
+	margin-top: 10px;
+	display: none;
+}
+
+#writingTopicResult,
+#handwritingResult {
+	white-space: pre-wrap;
+	padding: 15px;
+	border: 1px solid #dddddd;
+	border-radius: 4px;
+	margin-top: 20px;
+	display: none;
+	background-color: #ffffff;
+}
+
+#toggleTopicResultButton,
+#toggleHandwritingResultButton {
+	background-color: #4caf50;
+	color: white;
+	padding: 10px 20px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 16px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	transition: background-color 0.3s;
+}
+
+#toggleTopicResultButton:hover,
+#toggleHandwritingResultButton:hover {
+	background-color: #45a049;
+}
+
+.loading {
+	display: none;
+	text-align: center;
+	margin: 20px 0;
+}
+
+button {
+	background-color: #4caf50;
+	color: white;
+	padding: 10px 20px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 16px;
+	margin-top: 10px;
+	transition: background-color 0.3s;
+}
+
+button:disabled {
+	background-color: #cccccc;
+	cursor: not-allowed;
+}
+
+button:hover:not(:disabled) {
+	background-color: #45a049;
+}
+
+.api-key-section {
+	margin-bottom: 20px;
+	margin-top: 20px;
+}
+
+.api-key-section input {
+	width: 100%;
+	padding: 8px;
+	margin-top: 5px;
+	border: 1px solid #dddddd;
+	border-radius: 4px;
+}
+
+.extracted-text {
+	font-family: "Courier New", monospace;
+	white-space: pre-wrap;
+	background-color: #f8f9fa;
+	padding: 1rem;
+	border-radius: 4px;
+	border: 1px solid #dee2e6;
+	line-height: 1.5;
+}
+
+.extracted-text pre {
+	margin: 0;
+	white-space: pre-wrap;
+}
+
+.input-controls {
+	display: flex;
+	justify-content: center;
+	align-items: center; /* Add this line to align items vertically */
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.camera-button {
+	background-color: #2196f3;
+	color: white;
+	padding: 8px 15px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	transition: background-color 0.3s;
+}
+
+.camera-button:hover {
+	background-color: #1976d2;
+}
+
+.feedback-box {
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.feedback-box h3 {
+    color: #4CAF50;
+    margin-top: 0;
+}
+
+.feedback-box p {
+    margin: 10px 0;
+}
+
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css");
