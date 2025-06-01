@@ -1,10 +1,25 @@
 // Build the DOM content dynamically
 const app = document.getElementById("app");
 app.innerHTML = `
-    <div class="container">
-        <h1>Creative Writing</h1>
+    <div class="section auth-section">
+        <div class="section-header">Authentication</div>
+        <div id="auth-form-container">
+            <input type="email" id="email" placeholder="Email" />
+            <input type="password" id="password" placeholder="Password" />
+            <button id="loginButton">Login</button>
+            <button id="signupButton">Sign Up</button>
+        </div>
+        <div id="user-info-container" style="display: none;">
+            <p>Logged in as: <span id="userEmail"></span></p>
+            <button id="logoutButton">Logout</button>
+        </div>
+        <div id="authMessage"></div>
+    </div>
+    <div id="main-content" style="display: none;">
+        <div class="container">
+            <h1>Creative Writing</h1>
 
-        <!-- API Key Section -->
+            <!-- API Key Section -->
         <div class="section api-key-section">
             <div class="section-header">API Key</div>
             <label for="apiKey">Gemini API Key:</label>
@@ -62,6 +77,7 @@ app.innerHTML = `
             <div id="feedbackResult"></div>
         </div>
     </div>
+    </div>
 `;
 
 // Global variables to store multiple images and processed file keys
@@ -74,6 +90,10 @@ let handwritingImageElements = [];
 // --------------------------
 // Configuration
 const GEMINI_API_KEY = "";
+const SUPABASE_URL = "YOUR_SUPABASE_URL"; // Replace with your actual Supabase URL
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; // Replace with your actual Supabase anon key
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // DOM Elements
 const apiKeyInput = document.getElementById("apiKey");
@@ -94,6 +114,9 @@ const handwritingResult = document.getElementById("handwritingResult");
 const toggleHandwritingResultButton = document.getElementById(
 	"toggleHandwritingResultButton"
 );
+const signupButton = document.getElementById('signupButton');
+const loginButton = document.getElementById('loginButton');
+const logoutButton = document.getElementById('logoutButton');
 
 // Event Listeners for Image Description Generation
 topicImageInput.addEventListener("change", handleTopicImageUpload);
@@ -262,6 +285,14 @@ async function callGeminiAPI(
 }
 
 async function generateImageDescription() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+        alert("Please log in to generate image descriptions.");
+        // Re-enable button and hide loading if they were changed before this check
+        topicGenerationLoading.style.display = "none";
+        generateTopicButton.disabled = false;
+        return;
+    }
 	topicGenerationLoading.style.display = "block";
 	generateTopicButton.disabled = true;
 	writingTopicResult.style.display = "none";
@@ -376,6 +407,14 @@ function handleHandwritingUpload(event) {
 }
 
 async function extractTextFromImage() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+        alert("Please log in to extract text from images.");
+        // Re-enable button and hide loading if they were changed before this check
+        handwritingLoading.style.display = "none";
+        handwritingBtn.disabled = false;
+        return;
+    }
 	handwritingLoading.style.display = "block";
 	handwritingBtn.disabled = true;
 	handwritingResult.style.display = "none";
@@ -566,6 +605,15 @@ const feedbackExample = `
 `;
 
 async function generateFeedback() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+        alert("Please log in to generate feedback.");
+        // Reset feedback message area if it was changed
+        const feedbackResult = document.getElementById("feedbackResult");
+        feedbackResult.textContent = "You need to be logged in to generate feedback.";
+        feedbackResult.classList.remove("feedback-box");
+        return;
+    }
 	const feedbackResult = document.getElementById("feedbackResult");
 	feedbackResult.textContent = "Generating feedback...";
 	feedbackResult.classList.remove("feedback-box"); // Remove class while loading
@@ -874,4 +922,190 @@ function observeForCopyButton(resultId) {
 document.addEventListener("DOMContentLoaded", () => {
     // List all result element IDs that need a copy button when content becomes available
     ["writingTopicResult", "handwritingResult", "feedbackResult"].forEach(observeForCopyButton);
+
+    // Initialize Supabase client (if not already done globally and accessible)
+    // const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Call checkInitialSession after DOM is loaded and Supabase is initialized
+    checkInitialSession();
 });
+
+function updateAuthUI(user) {
+    const authFormContainer = document.getElementById('auth-form-container');
+    const userInfoContainer = document.getElementById('user-info-container');
+    const userEmailSpan = document.getElementById('userEmail');
+    const mainContent = document.getElementById('main-content');
+    const authMessage = document.getElementById('authMessage');
+
+    if (user) {
+        // User is logged in
+        if (authFormContainer) authFormContainer.style.display = 'none';
+        if (userInfoContainer) userInfoContainer.style.display = 'block';
+        if (userEmailSpan) userEmailSpan.textContent = user.email;
+        if (mainContent) mainContent.style.display = 'block'; // Show main content
+        // Clear any previous auth messages like "Login successful" if needed upon UI update
+        // if (authMessage) authMessage.textContent = '';
+    } else {
+        // User is logged out
+        if (authFormContainer) authFormContainer.style.display = 'block';
+        if (userInfoContainer) userInfoContainer.style.display = 'none';
+        if (userEmailSpan) userEmailSpan.textContent = '';
+        if (mainContent) mainContent.style.display = 'none'; // Hide main content
+    }
+}
+
+supabase.auth.onAuthStateChange((event, session) => {
+    console.log('Auth event:', event, 'Session:', session); // For debugging
+    const user = session ? session.user : null;
+    updateAuthUI(user);
+
+    // Clear auth messages on successful login/logout events handled here
+    const authMessage = document.getElementById('authMessage');
+    if (authMessage && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
+        // Optionally clear message or set a generic one
+        // For example, after successful login, the "Login successful!" message from handleLogin
+        // might be cleared here, or you might set a welcome message.
+        // authMessage.textContent = user ? `Welcome, ${user.email}` : 'You are now logged out.';
+    }
+});
+
+async function checkInitialSession() {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session ? session.user : null;
+    updateAuthUI(user);
+    if (user) {
+        console.log('User already logged in on page load:', user);
+    } else {
+        console.log('No active session on page load.');
+    }
+}
+
+async function handleSignup() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const authMessage = document.getElementById('authMessage');
+
+    authMessage.textContent = ''; // Clear previous messages
+
+    if (!email || !password) {
+        authMessage.textContent = 'Please enter both email and password.';
+        return;
+    }
+
+    if (password.length < 6) {
+        authMessage.textContent = 'Password should be at least 6 characters.';
+        return;
+    }
+
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            throw error;
+        }
+
+        // Check if data.user is not null and if data.user.identities is not empty
+        if (data.user && data.user.identities && data.user.identities.length > 0) {
+             authMessage.textContent = 'Signup successful! Please check your email to confirm your account.';
+        } else {
+            // This case might indicate that email confirmation is disabled and the user is automatically signed in,
+            // or it's an older version of Supabase/gotrue.
+            // If user is directly available in data.user without needing confirmation:
+             authMessage.textContent = 'Signup successful! You are now logged in.';
+             // Potentially call a function here to update UI for logged-in state if auto-confirmation is on
+        }
+        // console.log('Signup data:', data); // For debugging
+
+    } catch (error) {
+        console.error('Signup error:', error);
+        authMessage.textContent = `Signup failed: ${error.message}`;
+    } finally {
+        document.getElementById('password').value = ''; // Clear password field
+    }
+}
+
+if (signupButton) {
+    signupButton.addEventListener('click', handleSignup);
+}
+
+async function handleLogin() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const authMessage = document.getElementById('authMessage');
+
+    authMessage.textContent = ''; // Clear previous messages
+
+    if (!email || !password) {
+        authMessage.textContent = 'Please enter both email and password.';
+        return;
+    }
+
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            throw error;
+        }
+
+        // console.log('Login data:', data); // For debugging
+        if (data.user) {
+            authMessage.textContent = 'Login successful!';
+            // Call a function to update UI (to be created in a later step)
+            // For now, we'll just log it and manually show/hide for testing,
+            // but the real UI update will be handled by onAuthStateChange listener
+            console.log('User logged in:', data.user);
+            // Example of direct UI update (will be refined later)
+            // document.getElementById('auth-form-container').style.display = 'none';
+            // document.getElementById('user-info-container').style.display = 'block';
+            // document.getElementById('userEmail').textContent = data.user.email;
+            // document.getElementById('main-content').style.display = 'block';
+        } else {
+             authMessage.textContent = 'Login successful, but no user data returned. Please check console.';
+        }
+
+    } catch (error) {
+        console.error('Login error:', error);
+        authMessage.textContent = `Login failed: ${error.message}`;
+    } finally {
+        document.getElementById('password').value = ''; // Clear password field
+    }
+}
+
+if (loginButton) {
+    loginButton.addEventListener('click', handleLogin);
+}
+
+async function handleLogout() {
+    const authMessage = document.getElementById('authMessage');
+    authMessage.textContent = ''; // Clear previous messages
+
+    try {
+        const { error } = await supabase.auth.signOut();
+
+        if (error) {
+            throw error;
+        }
+        authMessage.textContent = 'Logged out successfully.';
+        // UI updates will be primarily handled by the onAuthStateChange listener
+        // console.log('User logged out');
+        // Example of direct UI update (will be refined later)
+        // document.getElementById('auth-form-container').style.display = 'block';
+        // document.getElementById('user-info-container').style.display = 'none';
+        // document.getElementById('userEmail').textContent = '';
+        // document.getElementById('main-content').style.display = 'none';
+
+    } catch (error) {
+        console.error('Logout error:', error);
+        authMessage.textContent = `Logout failed: ${error.message}`;
+    }
+}
+
+if (logoutButton) {
+    logoutButton.addEventListener('click', handleLogout);
+}
