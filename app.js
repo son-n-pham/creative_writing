@@ -1,10 +1,25 @@
 // Build the DOM content dynamically
 const app = document.getElementById("app");
 app.innerHTML = `
-    <div class="container">
-        <h1>Creative Writing</h1>
+    <div class="section auth-section">
+        <div class="section-header">Authentication</div>
+        <div id="auth-form-container">
+            <input type="email" id="email" placeholder="Email" />
+            <input type="password" id="password" placeholder="Password" />
+            <button id="loginButton">Login</button>
+            <button id="signupButton">Sign Up</button>
+        </div>
+        <div id="user-info-container" style="display: none;">
+            <p>Logged in as: <span id="userEmail"></span></p>
+            <button id="logoutButton">Logout</button>
+        </div>
+        <div id="authMessage"></div>
+    </div>
+    <div id="main-content" style="display: none;">
+        <div class="container">
+            <h1>Creative Writing</h1>
 
-        <!-- API Key Section -->
+            <!-- API Key Section -->
         <div class="section api-key-section">
             <div class="section-header">API Key</div>
             <label for="apiKey">Gemini API Key:</label>
@@ -62,6 +77,7 @@ app.innerHTML = `
             <div id="feedbackResult"></div>
         </div>
     </div>
+    </div>
 `;
 
 // Global variables to store multiple images and processed file keys
@@ -74,6 +90,10 @@ let handwritingImageElements = [];
 // --------------------------
 // Configuration
 const GEMINI_API_KEY = "";
+const SUPABASE_URL = "YOUR_SUPABASE_URL"; // Replace with your actual Supabase URL
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; // Replace with your actual Supabase anon key
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // DOM Elements
 const apiKeyInput = document.getElementById("apiKey");
@@ -94,6 +114,9 @@ const handwritingResult = document.getElementById("handwritingResult");
 const toggleHandwritingResultButton = document.getElementById(
 	"toggleHandwritingResultButton"
 );
+const signupButton = document.getElementById('signupButton');
+const loginButton = document.getElementById('loginButton');
+const logoutButton = document.getElementById('logoutButton');
 
 // Event Listeners for Image Description Generation
 topicImageInput.addEventListener("change", handleTopicImageUpload);
@@ -264,6 +287,14 @@ async function callGeminiAPI(
 }
 
 async function generateImageDescription() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+        alert("Please log in to generate image descriptions.");
+        // Re-enable button and hide loading if they were changed before this check
+        topicGenerationLoading.style.display = "none";
+        generateTopicButton.disabled = false;
+        return;
+    }
 	topicGenerationLoading.style.display = "block";
 	generateTopicButton.disabled = true;
 	writingTopicResult.style.display = "none";
@@ -378,6 +409,14 @@ function handleHandwritingUpload(event) {
 }
 
 async function extractTextFromImage() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+        alert("Please log in to extract text from images.");
+        // Re-enable button and hide loading if they were changed before this check
+        handwritingLoading.style.display = "none";
+        handwritingBtn.disabled = false;
+        return;
+    }
 	handwritingLoading.style.display = "block";
 	handwritingBtn.disabled = true;
 	handwritingResult.style.display = "none";
@@ -568,6 +607,15 @@ const feedbackExample = `
 `;
 
 async function generateFeedback() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || !session.user) {
+        alert("Please log in to generate feedback.");
+        // Reset feedback message area if it was changed
+        const feedbackResult = document.getElementById("feedbackResult");
+        feedbackResult.textContent = "You need to be logged in to generate feedback.";
+        feedbackResult.classList.remove("feedback-box");
+        return;
+    }
 	const feedbackResult = document.getElementById("feedbackResult");
 	feedbackResult.textContent = "Generating feedback...";
 	feedbackResult.classList.remove("feedback-box"); // Remove class while loading
@@ -888,8 +936,6 @@ function observeForCopyButton(resultId) {
 
 // Set up observers once the DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-	// List all result element IDs that need a copy button when content becomes available
-	["writingTopicResult", "handwritingResult", "feedbackResult"].forEach(
-		observeForCopyButton
-	);
+    // List all result element IDs that need a copy button when content becomes available
+    ["writingTopicResult", "handwritingResult", "feedbackResult"].forEach(observeForCopyButton);
 });
