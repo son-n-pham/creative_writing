@@ -100,92 +100,94 @@ topicImageInput.addEventListener("change", handleTopicImageUpload);
 generateTopicButton.addEventListener("click", generateImageDescription);
 
 function handleTopicImageUpload(event) {
-    const files = event.target.files;
-    const previewContainer = document.getElementById("topicImagePreviewContainer");
-    if (files.length > 0) {
-        Array.from(files).forEach((file) => {
-            // Create a unique key for the file using its name and lastModified date
-            const fileKey = file.name + "_" + file.lastModified;
-            if (processedTopicFiles.has(fileKey)) {
-                // Skip files that were already processed
-                return;
-            }
-            processedTopicFiles.add(fileKey);
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                // Create container for image and action icons
-                const container = document.createElement("div");
-                container.style.position = "relative";
-                container.style.display = "inline-block";
-                container.style.margin = "5px";
-                
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                // Set a fixed thumbnail height while keeping aspect ratio
-                img.style.height = "150px";
-                img.style.width = "auto";
-                img.style.display = "block"; // helps remove any inline gaps
-                container.appendChild(img);
-                
-                // Create zoom icon button at top left corner
-                const zoomIcon = document.createElement("button");
-                zoomIcon.innerHTML = "<i class='fas fa-search-plus'></i>";
-                zoomIcon.style.position = "absolute";
-                zoomIcon.style.top = "0px";
-                zoomIcon.style.left = "0px";
-                zoomIcon.style.background = "transparent";
-                zoomIcon.style.border = "none";
-                zoomIcon.style.color = "#2196f3";
-                zoomIcon.style.cursor = "pointer";
-                zoomIcon.style.fontSize = "16px";
-                zoomIcon.style.zIndex = "10";
-                zoomIcon.addEventListener("click", () => {
-                    if (zoomIcon.innerHTML.indexOf("fa-search-plus") !== -1) {
-                        img.style.height = "auto";
-                        img.style.maxWidth = "90%";
-                        zoomIcon.innerHTML = "<i class='fas fa-search-minus'></i>";
-                    } else {
-                        // Reset to thumbnail size
-                        img.style.height = "150px";
-                        img.style.width = "auto";
-                        zoomIcon.innerHTML = "<i class='fas fa-search-plus'></i>";
-                    }
-                });
-                container.appendChild(zoomIcon);
-                
-                // Create remove icon button at top right corner
-                const removeIcon = document.createElement("button");
-                removeIcon.innerHTML = "<i class='fas fa-times'></i>";
-                removeIcon.style.position = "absolute";
-                removeIcon.style.top = "0px";
-                removeIcon.style.right = "0px";
-                removeIcon.style.background = "transparent";
-                removeIcon.style.border = "none";
-                removeIcon.style.color = "red";
-                removeIcon.style.cursor = "pointer";
-                removeIcon.style.fontSize = "16px";
-                removeIcon.style.zIndex = "10";
-                removeIcon.addEventListener("click", () => {
-                    container.remove();
-                    topicImageElements = topicImageElements.filter(
-                        (element) => element !== img
-                    );
-                });
-                container.appendChild(removeIcon);
-                
-                previewContainer.appendChild(container);
-                topicImageElements.push(img);
-                generateTopicButton.disabled = false;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
+	const files = event.target.files;
+	const previewContainer = document.getElementById(
+		"topicImagePreviewContainer"
+	);
+	if (files.length > 0) {
+		Array.from(files).forEach((file) => {
+			// Create a unique key for the file using its name and lastModified date
+			const fileKey = file.name + "_" + file.lastModified;
+			if (processedTopicFiles.has(fileKey)) {
+				// Skip files that were already processed
+				return;
+			}
+			processedTopicFiles.add(fileKey);
+			const reader = new FileReader();
+			reader.onload = function (e) {
+				// Create container for image and action icons
+				const container = document.createElement("div");
+				container.style.position = "relative";
+				container.style.display = "inline-block";
+				container.style.margin = "5px";
+
+				const img = document.createElement("img");
+				img.src = e.target.result;
+				// Set a fixed thumbnail height while keeping aspect ratio
+				img.style.height = "150px";
+				img.style.width = "auto";
+				img.style.display = "block"; // helps remove any inline gaps
+				container.appendChild(img);
+
+				// Create zoom icon button at top left corner
+				const zoomIcon = document.createElement("button");
+				zoomIcon.innerHTML = "<i class='fas fa-search-plus'></i>";
+				zoomIcon.style.position = "absolute";
+				zoomIcon.style.top = "0px";
+				zoomIcon.style.left = "0px";
+				zoomIcon.style.background = "transparent";
+				zoomIcon.style.border = "none";
+				zoomIcon.style.color = "#2196f3";
+				zoomIcon.style.cursor = "pointer";
+				zoomIcon.style.fontSize = "16px";
+				zoomIcon.style.zIndex = "10";
+				zoomIcon.addEventListener("click", () => {
+					if (zoomIcon.innerHTML.indexOf("fa-search-plus") !== -1) {
+						img.style.height = "auto";
+						img.style.maxWidth = "90%";
+						zoomIcon.innerHTML = "<i class='fas fa-search-minus'></i>";
+					} else {
+						// Reset to thumbnail size
+						img.style.height = "150px";
+						img.style.width = "auto";
+						zoomIcon.innerHTML = "<i class='fas fa-search-plus'></i>";
+					}
+				});
+				container.appendChild(zoomIcon);
+
+				// Create remove icon button at top right corner
+				const removeIcon = document.createElement("button");
+				removeIcon.innerHTML = "<i class='fas fa-times'></i>";
+				removeIcon.style.position = "absolute";
+				removeIcon.style.top = "0px";
+				removeIcon.style.right = "0px";
+				removeIcon.style.background = "transparent";
+				removeIcon.style.border = "none";
+				removeIcon.style.color = "red";
+				removeIcon.style.cursor = "pointer";
+				removeIcon.style.fontSize = "16px";
+				removeIcon.style.zIndex = "10";
+				removeIcon.addEventListener("click", () => {
+					container.remove();
+					topicImageElements = topicImageElements.filter(
+						(element) => element !== img
+					);
+				});
+				container.appendChild(removeIcon);
+
+				previewContainer.appendChild(container);
+				topicImageElements.push(img);
+				generateTopicButton.disabled = false;
+			};
+			reader.readAsDataURL(file);
+		});
+	}
 }
 
 async function callGeminiAPI(
 	imageElements = null,
 	prompt,
-	model = "gemini-2.0-flash-001",
+	model = "gemini-2.0-flash",
 	formatType = "default"
 ) {
 	const apiKey = apiKeyInput.value.trim();
@@ -382,7 +384,7 @@ async function extractTextFromImage() {
 	toggleHandwritingResultButton.textContent = "Show Extracted Text";
 
 	const prompt = `Extract ALL text from the image ONLY adding any additional text.`;
-	const model = "gemini-2.0-flash-lite-preview-02-05";
+	const model = "gemini-2.0-flash-lite";
 
 	try {
 		const extractedText = await callGeminiAPI(
@@ -605,7 +607,7 @@ async function generateFeedback() {
         ### Feedback Example
         ${feedbackExample}
     `;
-	const model = "gemini-2.0-flash-001";
+	const model = "gemini-2.0-flash";
 	try {
 		const feedback = await callGeminiAPI(null, prompt, model);
 		feedbackResult.innerHTML = marked.parse(feedback);
@@ -817,39 +819,44 @@ toggleTopicResultButton.addEventListener("click", function () {
  * The copy button displays a Font Awesome icon and copies the result's text to the clipboard.
  */
 function addCopyButton(resultId) {
-    const resultElem = document.getElementById(resultId);
-    if (!resultElem) return;
+	const resultElem = document.getElementById(resultId);
+	if (!resultElem) return;
 
-    // Only add copy btn if there is content and one hasn't been added already
-    if (!resultElem.textContent.trim()) return;
-    if (resultElem.nextElementSibling && resultElem.nextElementSibling.classList.contains("copy-button")) return;
+	// Only add copy btn if there is content and one hasn't been added already
+	if (!resultElem.textContent.trim()) return;
+	if (
+		resultElem.nextElementSibling &&
+		resultElem.nextElementSibling.classList.contains("copy-button")
+	)
+		return;
 
-    const copyBtn = document.createElement("button");
-    copyBtn.innerHTML = "<i class='fas fa-copy'></i>";
-    copyBtn.classList.add("copy-button"); // Prevent duplicate buttons
-    // Style the icon button (you can adjust these styles in your CSS)
-    Object.assign(copyBtn.style, {
-        marginLeft: "10px",
-        padding: "5px",
-        fontSize: "16px",
-        cursor: "pointer",
-        border: "none",
-        background: "transparent",
-    });
+	const copyBtn = document.createElement("button");
+	copyBtn.innerHTML = "<i class='fas fa-copy'></i>";
+	copyBtn.classList.add("copy-button"); // Prevent duplicate buttons
+	// Style the icon button (you can adjust these styles in your CSS)
+	Object.assign(copyBtn.style, {
+		marginLeft: "10px",
+		padding: "5px",
+		fontSize: "16px",
+		cursor: "pointer",
+		border: "none",
+		background: "transparent",
+	});
 
-    copyBtn.addEventListener("click", () => {
-        const textToCopy = resultElem.innerText;
-        navigator.clipboard.writeText(textToCopy)
-            .then(() => {
-                copyBtn.innerHTML = "<i class='fas fa-check'></i>";
-                setTimeout(() => {
-                    copyBtn.innerHTML = "<i class='fas fa-copy'></i>";
-                }, 2000);
-            })
-            .catch((err) => console.error("Failed to copy text:", err));
-    });
+	copyBtn.addEventListener("click", () => {
+		const textToCopy = resultElem.innerText;
+		navigator.clipboard
+			.writeText(textToCopy)
+			.then(() => {
+				copyBtn.innerHTML = "<i class='fas fa-check'></i>";
+				setTimeout(() => {
+					copyBtn.innerHTML = "<i class='fas fa-copy'></i>";
+				}, 2000);
+			})
+			.catch((err) => console.error("Failed to copy text:", err));
+	});
 
-    resultElem.parentNode.insertBefore(copyBtn, resultElem.nextSibling);
+	resultElem.parentNode.insertBefore(copyBtn, resultElem.nextSibling);
 }
 
 /**
@@ -857,21 +864,32 @@ function addCopyButton(resultId) {
  * When text content becomes available (or is updated), the observer calls addCopyButton().
  */
 function observeForCopyButton(resultId) {
-    const resultElem = document.getElementById(resultId);
-    if (!resultElem) return;
+	const resultElem = document.getElementById(resultId);
+	if (!resultElem) return;
 
-    // Create the observer and add the copy button if text is present and not already added
-    const observer = new MutationObserver(() => {
-        if (resultElem.textContent.trim() && 
-            !(resultElem.nextElementSibling && resultElem.nextElementSibling.classList.contains("copy-button"))) {
-            addCopyButton(resultId);
-        }
-    });
-    observer.observe(resultElem, { childList: true, subtree: true, characterData: true });
+	// Create the observer and add the copy button if text is present and not already added
+	const observer = new MutationObserver(() => {
+		if (
+			resultElem.textContent.trim() &&
+			!(
+				resultElem.nextElementSibling &&
+				resultElem.nextElementSibling.classList.contains("copy-button")
+			)
+		) {
+			addCopyButton(resultId);
+		}
+	});
+	observer.observe(resultElem, {
+		childList: true,
+		subtree: true,
+		characterData: true,
+	});
 }
 
 // Set up observers once the DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-    // List all result element IDs that need a copy button when content becomes available
-    ["writingTopicResult", "handwritingResult", "feedbackResult"].forEach(observeForCopyButton);
+	// List all result element IDs that need a copy button when content becomes available
+	["writingTopicResult", "handwritingResult", "feedbackResult"].forEach(
+		observeForCopyButton
+	);
 });
